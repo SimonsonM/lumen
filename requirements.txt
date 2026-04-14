@@ -1,0 +1,8 @@
+anthropic
+chromadb>=0.4.0
+fastmcp
+tiktoken
+ollama
+click
+python-dotenv
+pytest
