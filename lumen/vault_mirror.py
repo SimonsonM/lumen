@@ -101,7 +101,15 @@ class VaultMirror:
 
         # Derive a title for the note from the summary's first sentence.
         first_line = summary.strip().split("\n")[0].strip()
-        title = first_line[:80] if first_line else f"Session {short_id}"
+        if first_line:
+            if len(first_line) <= 80:
+                title = first_line
+            else:
+                # Cut on word boundary, not mid-word
+                cut = first_line[:80].rsplit(" ", 1)[0]
+                title = f"{cut}…" if cut else first_line[:80]
+        else:
+            title = f"Session {short_id}"
 
         # Frontmatter
         tag_list = ["lumen-session"] + route_names
