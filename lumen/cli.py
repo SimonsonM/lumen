@@ -15,6 +15,7 @@ from lumen.compressor import QwenCompressor
 from lumen.synthesizer import SonnetSynthesizer
 from lumen.router import ExpertRouter
 from lumen.chroma_writer import ChromaWriter
+from lumen.vault_mirror import VaultMirror
 from lumen.rooms import ALL_ROOMS
 
 load_dotenv()
@@ -30,6 +31,7 @@ class LumenPipeline:
         self.synthesizer = SonnetSynthesizer()
         self.router = ExpertRouter()
         self.writer = ChromaWriter()
+        self.vault = VaultMirror()
 
     def ingest(self, text: str, session_id: Optional[str] = None) -> dict:
         """Run full ingestion pipeline on text."""
@@ -67,6 +69,22 @@ class LumenPipeline:
             )
             doc_ids.append(doc_id)
 
+        vault_path = None
+        try:
+            vp = self.vault.write_session(
+                session_id=self.logger.session_id,
+                timestamp=self.logger.timestamp,
+                synthesized=synthesized,
+                routes=routes,
+                token_count=token_count,
+                compressed_count=compressed_count,
+                doc_ids=doc_ids,
+            )
+            if vp is not None:
+                vault_path = str(vp)
+        except Exception as e:
+            print(f"[lumen.vault] mirror error: {e}")
+
         return {
             "session_id": self.logger.session_id,
             "timestamp": self.logger.timestamp,
@@ -74,7 +92,8 @@ class LumenPipeline:
             "strategy": strategy,
             "routes": [(r.name, c) for r, c in routes],
             "synthesized": synthesized,
-            "doc_ids": doc_ids
+            "doc_ids": doc_ids,
+            "vault_path": vault_path,
         }
 
 

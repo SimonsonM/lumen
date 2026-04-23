@@ -4,3 +4,7 @@ __pycache__/
 .pytest_cache/
 logs/*.log
 /tmp/
+
+# runtime data — canonical memory, should not be versioned
+chroma_data/
+logs/
